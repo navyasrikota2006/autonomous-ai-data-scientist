@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: ml_research_db
+    environment:
+      POSTGRES_USER: ml_user
+      POSTGRES_PASSWORD: ml_password
+      POSTGRES_DB: ml_database
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ml_user -d ml_database"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: ml_research_backend
+    environment:
+      - DATABASE_URL=postgresql://ml_user:ml_password@db:5432/ml_database
+      - LLM_PROVIDER=none
+      - OPENAI_API_KEY=
+      - ANTHROPIC_API_KEY=
+      - GEMINI_API_KEY=
+      - LLM_MODEL=
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/workspace
+      - mlruns:/workspace/mlruns
+      - reports:/workspace/reports
+    depends_on:
+      db:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: ml_research_frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
+volumes:
+  pgdata:
+  mlruns:
+  reports:

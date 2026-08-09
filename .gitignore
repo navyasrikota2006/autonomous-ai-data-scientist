@@ -1,0 +1,50 @@
+# Python
+__pycache__/
+*.py[cod]
+*.class
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+
+# Secrets / environment files
+.env
+.env.*
+!.env.example
+
+# Databases
+db.sqlite3
+*.db
+*.sqlite
+*.sqlite3
+
+# Test / cache
+.pytest_cache/
+.eslintcache
+
+# Node
+node_modules/
+dist/
+dist-ssr/
+*.local
+
+# Experiment outputs
+mlruns/
+reports/*.zip
+reports/run_artifacts_*
+
+# Generated AI/Data Science artifacts
+autonomous_ai_scientist_artifacts_*/
+autonomous_ai_scientist_artifacts_*.zip
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Generated backend reports and test artifacts
+backend/reports/
+backend/test_actual_model_card.pdf
