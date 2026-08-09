@@ -340,3 +340,70 @@ def test_classification_pipeline(tmp_path):
     # Target values should be converted to 0/1 integers
     assert set(y_train).issubset({0, 1})
     assert np.issubdtype(X_train.dtype, np.number)
+
+
+def test_preprocessor_serialization(tmp_path):
+    """
+    Regression test for serialization (pickling) of the data preprocessor and its pipeline.
+    Ensures that the fitted DataPreprocessor and combined model pipeline can be joblib dumped and loaded.
+    """
+    import joblib
+    # 1. Create a small mixed-type dataset
+    df = pd.DataFrame({
+        "Age": [25, 30, 45, 22, 35, 40, 50, 28, 38, 42],
+        "Contract": ["Month-to-month", "One year", "Two year", "Month-to-month", "One year", "Two year", "Month-to-month", "One year", "Two year", "Month-to-month"],
+        "MixedCol": ["A", 2, "C", np.nan, "E", "A", 2, "C", np.nan, "E"],
+        "Target": ["Yes", "No", "Yes", "No", "Yes", "No", "Yes", "No", "Yes", "No"]
+    })
+    
+    # 2. Build the DataPreprocessor
+    dp = DataPreprocessor(target_column="Target", problem_type="classification")
+    
+    # 3. Fit/transform the data
+    X_train, X_val, y_train, y_val, features = dp.fit_transform(
+        df=df,
+        numerical_columns=["Age"],
+        categorical_columns=["Contract", "MixedCol"],
+        id_columns=[]
+    )
+    
+    # 4. Serialize the resulting preprocessing pipeline using joblib.dump()
+    preprocessor_path = os.path.join(tmp_path, "preprocessor.joblib")
+    joblib.dump(dp, preprocessor_path)
+    
+    # Ensure raw pipeline within it can also be dumped (like combined pipeline does)
+    from sklearn.pipeline import Pipeline as SklearnPipeline
+    from sklearn.linear_model import LogisticRegression
+    clf = LogisticRegression()
+    clf.fit(X_train, y_train)
+    combined_pipeline = SklearnPipeline(steps=[
+        ('preprocessor', dp.pipeline),
+        ('estimator', clf)
+    ])
+    combined_path = os.path.join(tmp_path, "combined.joblib")
+    joblib.dump(combined_pipeline, combined_path)
+    
+    # 5. Load it again using joblib.load()
+    loaded_dp = joblib.load(preprocessor_path)
+    loaded_combined = joblib.load(combined_path)
+    
+    # 6. Transform compatible data with the loaded pipeline
+    test_df = pd.DataFrame({
+        "Age": [28, np.nan],
+        "Contract": ["One year", "Month-to-month"],
+        "MixedCol": [1, np.nan]
+    })
+    
+    transformed_dp = loaded_dp.transform(test_df)
+    transformed_combined = loaded_combined.named_steps['preprocessor'].transform(test_df)
+    
+    # 7. Assert that serialization and transformation succeed.
+    assert transformed_dp.shape == (2, X_train.shape[1])
+    assert transformed_combined.shape == (2, X_train.shape[1])
+    assert np.allclose(transformed_dp, transformed_combined)
+    
+    # Also assert that predicting through combined pipeline works
+    preds = loaded_combined.predict(test_df)
+    assert preds.shape == (2,)
+
+

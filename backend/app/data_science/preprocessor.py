@@ -6,7 +6,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
 from sklearn.impute import SimpleImputer
-from sklearn.preprocessing import StandardScaler, OneHotEncoder
+from sklearn.preprocessing import StandardScaler, OneHotEncoder, FunctionTransformer
 from typing import Dict, Any, List, Tuple
 
 def cast_to_string_array(X):
@@ -136,15 +136,9 @@ class DataPreprocessor:
             ('scaler', StandardScaler())
         ])
         
-        from sklearn.preprocessing import FunctionTransformer
-        # Simple caster that casts inputs to string and handles missing values
-        def safe_cast_to_str(arr):
-            import pandas as pd
-            return pd.DataFrame(arr).astype(str).fillna("missing").values
-            
         cat_transformer = Pipeline(steps=[
             ('imputer', SimpleImputer(strategy='constant', fill_value='missing')),
-            ('caster', FunctionTransformer(safe_cast_to_str)),
+            ('caster', FunctionTransformer(cast_to_string_array, validate=False)),
             ('onehot', OneHotEncoder(handle_unknown='ignore', sparse_output=False, dtype=np.float64))
         ])
         

@@ -838,6 +838,44 @@ Frontend Engineering
 MLOps-oriented practices
 
 into a single end-to-end platform.
+---
+
+## Product Screenshots
+
+### Dashboard
+
+![Autonomous AI Data Scientist Dashboard](docs/screenshots/dashboard.png)
+
+### Dataset Profiling
+
+![Dataset Profiling](docs/screenshots/dataset.png)
+
+### Dynamic Target Selection
+
+![Dynamic Target Selection](docs/screenshots/dataset_target.png)
+
+### Multi-Agent ML Pipeline
+
+![Multi-Agent ML Pipeline](docs/screenshots/agent_pipeline.png)
+
+### EDA & Explainability
+
+![EDA and Explainability](docs/screenshots/eda.shapes.png)
+
+### Model Leaderboard
+
+![Model Leaderboard](docs/screenshots/model-leaderboard.png)
+
+### Research Report
+
+![Research Report](docs/screenshots/research_report1.png)
+
+![Research Report Analysis](docs/screenshots/research_report2.png)
+
+![Research Report Results](docs/screenshots/research_report3.png)
+
+![Research Report Details](docs/screenshots/research_report4.png)
+
 
 Author
 Navya Kota
